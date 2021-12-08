@@ -8,8 +8,10 @@ var fs = require('fs');
 var http = require('http');
 var https = require('https');
 //var privateKey  = fs.readFileSync(path.resolve('server/key.pem', 'utf8'));
-var privateKey  = fs.readFileSync('server/key.pem', 'utf8');
-var certificate = fs.readFileSync('server/cert.pem', 'utf8');
+// var privateKey  = fs.readFileSync('server/key.pem', 'utf8');
+// var certificate = fs.readFileSync('server/cert.pem', 'utf8');
+var privateKey  = fs.readFileSync(__dirname + '/server.key', 'utf8');
+var certificate = fs.readFileSync(__dirname + '/server.crt', 'utf8');
 var credentials = {key: privateKey, cert: certificate};
 const app = express();
 
@@ -19,15 +21,15 @@ app.use(body());
 app.use(express.static(path.resolve(__dirname, '..', 'build')));
 
 const db = mysql.createConnection({
-    host: '172.24.32.1',
-    user: 'bonn',
-    password: '1234',
-    database: 'testing'
+    host: '172.29.96.1',
+    user: 'dxrunpm',
+    password: '0303',
+    database: 'dbms-fb'
 });
 // show data
 app.get('/data', function(req,res){
     console.log("Hello in /data ");
-    let sql = 'SELECT * FROM users;';
+    let sql = 'SELECT * FROM tb_member;';
     db.query(sql, (err, result)=>{
         if(err) throw err;
         console.log(result);
@@ -38,7 +40,7 @@ app.get('/data', function(req,res){
 
 //delete
 app.put('/delete', function(req, res) {
-    var sql = 'DELETE FROM users WHERE id = ?';
+    var sql = 'DELETE FROM tb_member WHERE id = ?';
     db.query(sql,[req.body.idkey],function (error, results) {
         if(error) throw error;
         res.send(JSON.stringify(results));
@@ -47,8 +49,12 @@ app.put('/delete', function(req, res) {
 
 //edit
 app.put('/data', function(req, res) {
-    var sql = 'UPDATE users SET firstname= ? , lastname = ? WHERE id = ?';
-    db.query(sql,[req.body.firstname,req.body.lastname,req.body.idkey],function (error, results) {
+    var sql = 'UPDATE tb_member SET fname= ? , lname = ? , tel = ? , email = ?  WHERE id = ?';
+    db.query(sql,[req.body.fname,
+                  req.body.lname,
+                  req.body.tel,
+                  req.body.email,
+                  req.body.idkey],function (error, results) {
         if(error) throw error;
         res.send(JSON.stringify(results));
     });
@@ -59,10 +65,12 @@ app.post('/data', function(req, res){
     console.log(req.body);
     let data = {
         id:req.body.idkey,
-        firstname:req.body.firstname,
-        lastname:req.body.lastname
+        fname:req.body.fname,
+        lname:req.body.lname,
+        tel:req.body.tel,
+        email:req.body.email
     };
-    let sql = 'INSERT INTO users SET ?';
+    let sql = 'INSERT INTO tb_member SET ?';
     db.query(sql, data, (err, result)=>{
         if(err){
             console.log(err);

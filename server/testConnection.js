@@ -1,10 +1,10 @@
 var mysql = require('mysql');
 
 var con = mysql.createConnection({
-  host: "172.24.32.1",
-  user: "bonn",
-  password: "1234",
-  database: 'testing'
+  host: "172.29.96.1",
+  user: "dxrunpm",
+  password: "0303",
+  database: 'dbms-fb'
 });
 
 con.connect(function(err) {
@@ -15,7 +15,7 @@ con.connect(function(err) {
 getDomain();
 
 function getDomain() {
-    return dbQuery('SELECT * FROM users;');
+    return dbQuery('SELECT * FROM tb_member;');
 }
 
 // * Important promise function
