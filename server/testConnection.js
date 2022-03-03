@@ -1,7 +1,7 @@
 var mysql = require('mysql');
 
 var con = mysql.createConnection({
-  host: "172.29.96.1",
+  host: "172.23.112.1",
   user: "dxrunpm",
   password: "0303",
   database: 'dbms-fb'

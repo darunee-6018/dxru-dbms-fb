@@ -21,7 +21,7 @@ app.use(body());
 app.use(express.static(path.resolve(__dirname, '..', 'build')));
 
 const db = mysql.createConnection({
-    host: '172.29.96.1',
+    host: '172.23.112.1',
     user: 'dxrunpm',
     password: '0303',
     database: 'dbms-fb'
@@ -29,13 +29,47 @@ const db = mysql.createConnection({
 // show data
 app.get('/data', function(req,res){
     console.log("Hello in /data ");
-    let sql = 'SELECT * FROM tb_member;';
+    let sql = 'SELECT * FROM `tb_member` JOIN `province` ON tb_member.province = province.provinceId JOIN `district` ON tb_member.district = district.districtId JOIN `subdistrict` ON tb_member.subdistrict = subdistrict.subdistrictId JOIN village ON tb_member.village = village.villageId ORDER BY `tb_member`.`id` ASC;';
     db.query(sql, (err, result)=>{
         if(err) throw err;
-        console.log(result);
         res.json(result);
     });
-    console.log("after query");
+});
+
+// show province
+app.get('/provinces', function(req,res){
+    let sql = 'SELECT * FROM `province`';
+    db.query(sql, (err, result)=>{
+        if(err) throw err;
+        res.json(result);
+    });
+});
+
+// show district with province
+app.get('/districts', function(req,res){
+    let sql = 'SELECT * FROM `district` WHERE provinceId = ?';
+    db.query(sql, [req.query.provinceId], (err, result)=>{
+        if(err) throw err;
+        res.json(result);
+    });
+});
+
+// show subdistrict with district
+app.get('/subdistricts', function(req,res){
+    let sql = 'SELECT * FROM `subdistrict` WHERE districtId = ?';
+    db.query(sql, [req.query.districtId], (err, result)=>{
+        if(err) throw err;
+        res.json(result);
+    });
+});
+
+// show village with subdistrict
+app.get('/villages', function(req,res){
+    let sql = 'SELECT * FROM `village` WHERE subdistrictId = ?';
+    db.query(sql, [req.query.subdistrictId], (err, result)=>{
+        if(err) throw err;
+        res.json(result);
+    });
 });
 
 //delete
@@ -49,11 +83,16 @@ app.put('/delete', function(req, res) {
 
 //edit
 app.put('/data', function(req, res) {
-    var sql = 'UPDATE tb_member SET fname= ? , lname = ? , tel = ? , email = ?  WHERE id = ?';
+    var sql = 'UPDATE tb_member SET fname= ? , lname = ? , tel = ? , province = ?, district = ?, subdistrict = ?, village = ?  WHERE id = ?';
     db.query(sql,[req.body.fname,
                   req.body.lname,
                   req.body.tel,
-                  req.body.email,
+
+                  req.body.province,
+                  req.body.district,
+                  req.body.subdistrict,
+                  req.body.village,
+
                   req.body.idkey],function (error, results) {
         if(error) throw error;
         res.send(JSON.stringify(results));
@@ -68,7 +107,12 @@ app.post('/data', function(req, res){
         fname:req.body.fname,
         lname:req.body.lname,
         tel:req.body.tel,
-        email:req.body.email
+        email:req.body.email,
+
+        province: req.body.province,
+        district: req.body.district,
+        subdistrict: req.body.subdistrict,
+        village: req.body.village,
     };
     let sql = 'INSERT INTO tb_member SET ?';
     db.query(sql, data, (err, result)=>{
